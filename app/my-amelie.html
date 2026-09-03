@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MY AMELIE</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Kalam:wght@400;700&family=Patrick+Hand&family=Shadows+Into+Light&family=Indie+Flower&family=Architects+Daughter&family=Gochi+Hand&family=Permanent+Marker&family=Inter:wght@400;500;600;700&display=swap');
+
+:root{
+  --paper:#FBF6EF;
+  --paper-line:#d4d4d4;
+  --ink:#3a2e2e;
+  --ink-soft:#7a6d63;
+  --marker:#c23e83;
+  --chimie:#2f8f7a;
+  --maths:#c97b2e;
+  --grid:#000000;
+  --matiere-font:'Caveat', cursive;
+  --matiere-weight:700;
+}
+
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  min-height:100vh;
+  background:var(--paper);
+  background-image:
+    linear-gradient(var(--paper-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--paper-line) 1px, transparent 1px);
+  background-size: 28px 28px;
+  font-family:'Inter', sans-serif;
+  color:var(--ink);
+  padding:20px 14px 70px;
+}
+
+.wrap{max-width:900px;margin:0 auto;}
+
+header{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-bottom:20px;
+  border-bottom:3px solid var(--ink);
+  padding-bottom:10px;
+}
+.title-block{min-width:200px;}
+h1{
+  font-family:'Caveat', cursive;
+  font-size:48px;
+  font-weight:700;
+  color:var(--marker);
+  margin:0;
+  line-height:1;
+}
+.tagline{
+  font-size:12px;
+  color:var(--ink-soft);
+  font-style:italic;
+}
+
+.export-bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.frame-color-picker{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:12px;
+  font-weight:600;
+  color:var(--ink);
+  background:#fff;
+  border:2px solid var(--ink);
+  border-radius:20px;
+  padding:4px 10px 4px 12px;
+  cursor:pointer;
+}
+.frame-color-picker input[type="color"]{
+  width:20px;
+  height:20px;
+  border:none;
+  padding:0;
+  background:none;
+  cursor:pointer;
+}
+.font-picker{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:12px;
+  font-weight:600;
+  color:var(--ink);
+  background:#fff;
+  border:2px solid var(--ink);
+  border-radius:20px;
+  padding:4px 10px 4px 12px;
+  cursor:pointer;
+}
+.font-picker select{
+  font-family:'Inter',sans-serif;
+  font-size:12px;
+  font-weight:600;
+  color:var(--ink);
+  background:transparent;
+  border:none;
+  outline:none;
+  cursor:pointer;
+  max-width:130px;
+}
+.export-bar button{
+  font-family:'Inter',sans-serif;
+  font-size:12px;
+  font-weight:600;
+  background:#fff;
+  border:2px solid var(--ink);
+  color:var(--ink);
+  border-radius:20px;
+  padding:6px 12px;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.export-bar button:hover{background:var(--marker);color:#fff;border-color:var(--marker);}
+.export-bar button:active{transform:translateY(1px);}
+
+/* ---------- TABLE ---------- */
+#tableExport{
+  background:#ffffff;
+  border:3px solid var(--frame-color, #000000);
+}
+
+table.sheet{
+  width:100%;
+  border-collapse:collapse;
+  table-layout:fixed;
+  background:#ffffff;
+}
+table.sheet th, table.sheet td{
+  border:1.5px solid #000000;
+  padding:9px 12px;
+  vertical-align:middle;
+  background:#ffffff;
+  print-color-adjust:exact;
+  -webkit-print-color-adjust:exact;
+}
+table.sheet thead th{
+  font-size:12px;
+  font-weight:600;
+  color:var(--ink-soft);
+  text-align:left;
+  letter-spacing:.02em;
+}
+
+col.col-matiere{width:170px;}
+col.col-cours{width:auto;}
+col.col-date{width:130px;}
+col.col-niveau{width:110px;}
+col.col-actions{width:34px;}
+
+.matiere-cell{
+  text-align:center;
+  position:relative;
+}
+.matiere-cell textarea{
+  font-family:var(--matiere-font, 'Caveat', cursive);
+  font-weight:var(--matiere-weight, 700);
+  font-size:26px;
+  line-height:1.4;
+  text-align:center;
+  background:transparent;
+  border:none;
+  width:100%;
+  resize:none;
+  overflow:visible;
+  white-space:pre-wrap;
+  word-break:break-word;
+  overflow-wrap:break-word;
+  color:var(--subj-color, var(--marker));
+  outline:none;
+  padding:6px 2px;
+  display:block;
+  margin:0 auto;
+}
+.del-subject{
+  display:block;
+  margin:4px auto 0;
+  font-size:11px;
+  color:var(--ink-soft);
+  background:none;
+  border:none;
+  cursor:pointer;
+  opacity:0.5;
+}
+.del-subject:hover{opacity:1;color:var(--marker);}
+
+.cours-input{
+  width:100%;
+  border:none;
+  background:transparent;
+  font-size:15px;
+  font-weight:500;
+  color:var(--ink);
+  outline:none;
+  font-family:'Inter',sans-serif;
+}
+.cours-input::placeholder{color:#c8bdae;}
+
+.date-input{
+  width:100%;
+  border:none;
+  background:transparent;
+  font-size:13px;
+  color:var(--ink-soft);
+  outline:none;
+  font-family:'Inter',sans-serif;
+}
+.date-input:hover, .cours-input:hover{background:#faf1e4;}
+
+.niveau-cell{text-align:center;position:relative;padding:0 !important;}
+.swatch{
+  width:100%;
+  height:100%;
+  min-height:40px;
+  border-radius:0;
+  border:none;
+  cursor:pointer;
+  display:block;
+  transition:filter .12s ease;
+}
+.swatch:hover{filter:brightness(0.95);}
+.swatch.empty{background:#fff;box-shadow:inset 0 0 0 2px #c8bdae;border:2px dashed #c8bdae;}
+
+.palette{
+  position:absolute;
+  top:34px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#fff;
+  border:2px solid var(--ink);
+  border-radius:8px;
+  padding:6px;
+  display:grid;
+  grid-template-columns:repeat(4, 22px);
+  gap:5px;
+  z-index:20;
+  box-shadow:0 4px 10px rgba(0,0,0,.15);
+}
+.palette button{
+  width:22px;height:22px;
+  border-radius:50%;
+  border:1px solid rgba(0,0,0,.15);
+  cursor:pointer;
+  padding:0;
+}
+.palette button.none{background:#fff;position:relative;}
+.palette button.none::after{
+  content:"";
+  position:absolute;
+  inset:4px;
+  border-top:2px solid #b33;
+  transform:rotate(45deg);
+}
+
+.del-row{
+  background:none;border:none;cursor:pointer;
+  color:var(--ink-soft);font-size:15px;opacity:0.35;
+  display:block;margin:0 auto;
+}
+.del-row:hover{opacity:1;color:var(--marker);}
+
+.add-course-row td{
+  text-align:left;
+  font-size:13px;
+  color:var(--ink-soft);
+  cursor:pointer;
+  background:#fff;
+}
+.add-course-row td:hover{color:var(--marker);}
+
+.add-subject-row td{
+  text-align:center;
+  padding:14px;
+  background:var(--paper);
+}
+.add-subject-row button{
+  font-family:'Caveat',cursive;
+  font-size:18px;
+  background:var(--marker);
+  color:#fff;
+  border:none;
+  border-radius:20px;
+  padding:8px 22px;
+  cursor:pointer;
+  box-shadow:0 3px 0 rgba(58,46,46,0.25);
+}
+.add-subject-row button:hover{filter:brightness(1.08);}
+
+/* elements to strip out of exported image/pdf */
+table.sheet.exporting .del-row,
+table.sheet.exporting .del-subject,
+table.sheet.exporting .add-course-row,
+table.sheet.exporting th:last-child,
+table.sheet.exporting td:last-child{
+  display:none;
+}
+table.sheet.exporting .add-subject-row{display:none;}
+
+.legend{
+  margin-top:14px;
+  font-size:12px;
+  color:var(--ink-soft);
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.legend .dot{width:10px;height:10px;border-radius:50%;display:inline-block;border:1px solid rgba(0,0,0,.2);flex-shrink:0;}
+
+.save-note{
+  text-align:center;
+  font-size:11px;
+  color:#b7ab9c;
+  margin-top:10px;
+  min-height:14px;
+}
+
+.saved-panel{
+  margin-top:34px;
+  border-top:3px solid var(--ink);
+  padding-top:18px;
+}
+.saved-panel-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-bottom:12px;
+}
+.saved-panel h2{
+  font-family:'Caveat', cursive;
+  font-size:30px;
+  color:var(--marker);
+  margin:0;
+}
+.saved-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.pill-btn{
+  font-family:'Inter',sans-serif;
+  font-size:12px;
+  font-weight:600;
+  background:#fff;
+  border:2px solid var(--ink);
+  color:var(--ink);
+  border-radius:20px;
+  padding:7px 14px;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.pill-btn:hover{background:#f6efe4;}
+.pill-btn.primary{background:var(--marker);border-color:var(--marker);color:#fff;}
+.pill-btn.primary:hover{filter:brightness(1.08);}
+
+.saved-list{display:flex;flex-direction:column;gap:8px;}
+.saved-item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+  background:#fff;
+  border:1px solid var(--ink);
+  padding:10px 14px;
+}
+.saved-item-info{display:flex;flex-direction:column;min-width:120px;}
+.saved-item-name{font-weight:600;font-size:14px;}
+.saved-item-date{font-size:11px;color:var(--ink-soft);}
+.saved-item-actions{display:flex;gap:6px;flex-wrap:wrap;}
+.saved-item-actions button{
+  font-size:12px;
+  font-weight:600;
+  background:#fff;
+  border:1px solid var(--ink);
+  color:var(--ink);
+  border-radius:16px;
+  padding:5px 11px;
+  cursor:pointer;
+}
+.saved-item-actions button:hover{background:var(--marker);border-color:var(--marker);color:#fff;}
+.saved-item-actions button.danger:hover{background:#b33;border-color:#b33;}
+
+.saved-empty{
+  font-size:13px;
+  color:var(--ink-soft);
+  font-style:italic;
+  padding:8px 0;
+}
+
+/* ---------- MOBILE ---------- */
+@media (max-width: 640px){
+  h1{font-size:38px;}
+  .export-bar button{font-size:11px;padding:6px 10px;}
+
+  table.sheet thead{display:none;}
+  table.sheet, table.sheet tbody, table.sheet tr, table.sheet td{display:block;width:100%;}
+
+  .matiere-cell{
+    text-align:left;
+    background:#ffffff;
+    border-bottom:none;
+  }
+  .matiere-cell textarea{text-align:left;font-size:24px;}
+  .del-subject{display:inline-block;margin:0 0 0 8px;}
+
+  tr.course-row{
+    border:1.5px solid #000000;
+    margin:8px 0;
+    position:relative;
+  }
+  tr.course-row td{
+    border:none;
+    border-bottom:1.5px solid #000000;
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+  }
+  tr.course-row td:last-child{border-bottom:none;}
+  tr.course-row td::before{
+    content: attr(data-label);
+    font-size:11px;
+    color:var(--ink-soft);
+    min-width:120px;
+    flex-shrink:0;
+  }
+  .cours-input, .date-input{text-align:right;}
+  .niveau-cell{padding:9px 12px !important;}
+  .niveau-cell .swatch{min-height:24px;width:24px;height:24px;border-radius:50%;}
+  .niveau-cell .swatch.empty{border-radius:50%;}
+  .del-row{
+    position:absolute;
+    top:4px;right:4px;
+    background:#fff;
+    border-radius:50%;
+    width:22px;height:22px;
+  }
+  td.actions-cell{
+    position:absolute;top:0;right:0;
+    width:auto;border:none;padding:0;
+  }
+  td.actions-cell::before{content:none;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="title-block">
+      <h1>MY AMELIE</h1>
+      <div class="tagline">mon tableau de révisions, en plus simple qu'Excel</div>
+    </div>
+    <div class="export-bar" id="exportBar">
+      <span id="userBadge" style="font-size:12px;color:var(--ink-soft);"></span>
+      <label class="frame-color-picker" title="Couleur du cadre">
+        Cadre
+        <input type="color" id="frameColor" value="#000000">
+      </label>
+      <label class="font-picker" title="Police d'écriture">
+        Police
+        <select id="fontSelect">
+          <option value="'Caveat', cursive">Caveat</option>
+          <option value="'Kalam', cursive">Kalam</option>
+          <option value="'Patrick Hand', cursive">Patrick Hand</option>
+          <option value="'Shadows Into Light', cursive">Shadows Into Light</option>
+          <option value="'Indie Flower', cursive">Indie Flower</option>
+          <option value="'Architects Daughter', cursive">Architects Daughter</option>
+          <option value="'Gochi Hand', cursive">Gochi Hand</option>
+          <option value="'Permanent Marker', cursive">Permanent Marker</option>
+          <option value="'Inter', sans-serif">Inter (standard)</option>
+          <option value="Georgia, serif">Georgia (standard)</option>
+        </select>
+      </label>
+      <label class="font-picker" title="Style d'écriture">
+        Style
+        <select id="fontWeightSelect">
+          <option value="400">Fin</option>
+          <option value="700" selected>Normal</option>
+          <option value="900">Gras</option>
+        </select>
+      </label>
+      <button data-export="pdf">Exporter PDF</button>
+      <button data-export="png">PNG</button>
+      <button data-export="jpg">JPG</button>
+      <button data-export="xlsx">Excel</button>
+      <button data-export="docx">Word</button>
+      <button data-export="txt">Texte</button>
+      <button id="logoutBtn" type="button">Déconnexion</button>
+    </div>
+  </header>
+
+  <div id="tableExport">
+    <table class="sheet" id="sheet">
+      <colgroup>
+        <col class="col-matiere">
+        <col class="col-cours">
+        <col class="col-date">
+        <col class="col-date">
+        <col class="col-niveau">
+        <col class="col-actions">
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Matière</th>
+          <th>Cours</th>
+          <th>Date du cours</th>
+          <th>Date de révision</th>
+          <th>Niveau</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="sheetBody"></tbody>
+    </table>
+  </div>
+
+  <div class="legend">
+    <span>Niveau =</span>
+    <span class="dot" style="background:#e6564f"></span> à revoir
+    <span class="dot" style="background:#f0b429"></span> moyen
+    <span class="dot" style="background:#3fae5a"></span> maîtrisé
+    <span style="color:#c8bdae">— touche le rond pour choisir une couleur</span>
+  </div>
+  <div class="save-note" id="saveNote"></div>
+
+  <section class="saved-panel">
+    <div class="saved-panel-head">
+      <h2>Mes tableaux</h2>
+      <div class="saved-actions">
+        <button id="saveAsBtn" class="pill-btn primary">Enregistrer ce tableau</button>
+        <button id="newTableBtn" class="pill-btn">+ Nouveau tableau</button>
+      </div>
+    </div>
+    <div id="savedList" class="saved-list"></div>
+    <div id="savedEmpty" class="saved-empty">Aucun tableau enregistré pour l'instant.</div>
+  </section>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+import {
+  getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs
+} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+import {
+  getAuth, onAuthStateChanged, signOut
+} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyApUH7CPqZ3EAbbRS9bN2b0sdepuSZVLCM",
+  authDomain: "my-amelie-8172c.firebaseapp.com",
+  projectId: "my-amelie-8172c",
+  storageBucket: "my-amelie-8172c.firebasestorage.app",
+  messagingSenderId: "329204791393",
+  appId: "1:329204791393:web:b33d880d6a4890e2a95220"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+const auth = getAuth(fbApp);
+let currentUid = null;
+
+function waitForAuth(){
+  return new Promise((resolve, reject) => {
+    onAuthStateChanged(auth, (user) => {
+      if(user){
+        currentUid = user.uid;
+        const badge = document.getElementById('userBadge');
+        if(badge) badge.textContent = user.email || '';
+        resolve(user.uid);
+      } else {
+        // Pas connecté : direction la page de connexion
+        window.location.href = "login.html";
+        reject(new Error("non-authentifié"));
+      }
+    });
+  });
+}
+
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  try{
+    await signOut(auth);
+    window.location.href = "login.html";
+  }catch(e){
+    console.error(e);
+  }
+});
+
+const PALETTE = ["#e6564f","#f0b429","#3fae5a","#3e8fd0","#9b5de5","#c23e83"];
+
+const defaultState = {
+  frameColor: "#000000",
+  fontFamily: "'Caveat', cursive",
+  fontWeight: "700",
+  subjects: [
+    { id:"s1", name:"Chimie", courses:[
+      { id:"c1", cours:"Acide - base", dateCours:"", dateRevision:"", niveau:"" },
+      { id:"c2", cours:"Thermodynamique", dateCours:"", dateRevision:"", niveau:"" }
+    ]},
+    { id:"s2", name:"Maths", courses:[
+      { id:"c3", cours:"Dérivées", dateCours:"", dateRevision:"", niveau:"" },
+      { id:"c4", cours:"Intégrales", dateCours:"", dateRevision:"", niveau:"" }
+    ]}
+  ]
+};
+
+let state = null;
+let uid = 100;
+const newId = (p) => p + (uid++);
+
+function applyFontSettings(){
+  if(!state.fontFamily) state.fontFamily = "'Caveat', cursive";
+  if(!state.fontWeight) state.fontWeight = "700";
+  document.getElementById('fontSelect').value = state.fontFamily;
+  document.getElementById('fontWeightSelect').value = state.fontWeight;
+  document.documentElement.style.setProperty('--matiere-font', state.fontFamily);
+  document.documentElement.style.setProperty('--matiere-weight', state.fontWeight);
+}
+
+function refitAllMatiere(){
+  document.querySelectorAll('.matiere-cell textarea').forEach(fitMatiereText);
+}
+
+async function load(){
+  try{
+    const snap = await getDoc(doc(db, 'users', currentUid));
+    state = (snap.exists() && snap.data().currentTable)
+      ? snap.data().currentTable
+      : JSON.parse(JSON.stringify(defaultState));
+  }catch(e){
+    console.error(e);
+    state = JSON.parse(JSON.stringify(defaultState));
+  }
+  if(!state.frameColor) state.frameColor = "#000000";
+  document.getElementById('frameColor').value = state.frameColor;
+  document.documentElement.style.setProperty('--frame-color', state.frameColor);
+  applyFontSettings();
+  render();
+  refitAllMatiere();
+}
+
+document.getElementById('frameColor').addEventListener('input', (e) => {
+  state.frameColor = e.target.value;
+  document.documentElement.style.setProperty('--frame-color', state.frameColor);
+  save();
+});
+
+document.getElementById('fontSelect').addEventListener('change', (e) => {
+  state.fontFamily = e.target.value;
+  document.documentElement.style.setProperty('--matiere-font', state.fontFamily);
+  refitAllMatiere();
+  save();
+});
+
+document.getElementById('fontWeightSelect').addEventListener('change', (e) => {
+  state.fontWeight = e.target.value;
+  document.documentElement.style.setProperty('--matiere-weight', state.fontWeight);
+  save();
+});
+
+let saveTimer = null;
+function save(){
+  const note = document.getElementById('saveNote');
+  note.textContent = "enregistrement...";
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    try{
+      await setDoc(doc(db, 'users', currentUid), { currentTable: state }, { merge: true });
+      note.textContent = "enregistré ✓";
+      setTimeout(()=>{ if(note.textContent==="enregistré ✓") note.textContent=""; }, 1500);
+    }catch(e){
+      console.error(e);
+      note.textContent = "erreur d'enregistrement : " + (e.code || e.message || e);
+    }
+  }, 400);
+}
+
+function closeAllPalettes(){
+  document.querySelectorAll('.palette').forEach(p => p.remove());
+}
+
+/* ---------- SAVED TABLES LIBRARY ---------- */
+let savedTables = [];
+
+function savedTablesCol(){
+  return collection(db, 'users', currentUid, 'savedTables');
+}
+
+async function loadSavedList(){
+  try{
+    const snap = await getDocs(savedTablesCol());
+    savedTables = [];
+    snap.forEach(d => savedTables.push({ id: d.id, ...d.data() }));
+    savedTables.sort((a,b) => new Date(a.savedAt) - new Date(b.savedAt));
+  }catch(e){
+    console.error(e);
+    savedTables = [];
+  }
+  renderSavedList();
+}
+
+function formatDate(iso){
+  const d = new Date(iso);
+  return d.toLocaleDateString('fr-FR', {day:'2-digit', month:'2-digit', year:'numeric'}) +
+         ' ' + d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+}
+
+function renderSavedList(){
+  const list = document.getElementById('savedList');
+  const empty = document.getElementById('savedEmpty');
+  list.innerHTML = "";
+  if(savedTables.length === 0){
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  savedTables.slice().reverse().forEach(entry => {
+    const item = document.createElement('div');
+    item.className = 'saved-item';
+
+    const info = document.createElement('div');
+    info.className = 'saved-item-info';
+    const name = document.createElement('div');
+    name.className = 'saved-item-name';
+    name.textContent = entry.name;
+    const date = document.createElement('div');
+    date.className = 'saved-item-date';
+    date.textContent = 'Enregistré le ' + formatDate(entry.savedAt);
+    info.appendChild(name);
+    info.appendChild(date);
+    item.appendChild(info);
+
+    const actions = document.createElement('div');
+    actions.className = 'saved-item-actions';
+
+    const openBtn = document.createElement('button');
+    openBtn.textContent = 'Modifier';
+    openBtn.addEventListener('click', () => openSaved(entry.id));
+    actions.appendChild(openBtn);
+
+    const dlBtn = document.createElement('button');
+    dlBtn.textContent = 'Télécharger PDF';
+    dlBtn.addEventListener('click', () => downloadSavedPDF(entry.id));
+    actions.appendChild(dlBtn);
+
+    const delBtn = document.createElement('button');
+    delBtn.textContent = '✕';
+    delBtn.className = 'danger';
+    delBtn.title = 'Supprimer ce tableau enregistré';
+    delBtn.addEventListener('click', () => deleteSaved(entry.id));
+    actions.appendChild(delBtn);
+
+    item.appendChild(actions);
+    list.appendChild(item);
+  });
+}
+
+async function saveCurrentAs(){
+  const suggested = `Tableau ${savedTables.length + 1}`;
+  const name = prompt("Nom de ce tableau :", suggested);
+  if(name === null) return;
+  const entry = {
+    id: newId('t'),
+    name: name.trim() || suggested,
+    savedAt: new Date().toISOString(),
+    data: JSON.parse(JSON.stringify(state))
+  };
+  const note = document.getElementById('saveNote');
+  try{
+    await setDoc(doc(savedTablesCol(), entry.id), {
+      name: entry.name,
+      savedAt: entry.savedAt,
+      data: entry.data
+    });
+    savedTables.push(entry);
+    renderSavedList();
+    note.textContent = "tableau enregistré dans « Mes tableaux » ✓";
+    setTimeout(()=>{ if(note.textContent==="tableau enregistré dans « Mes tableaux » ✓") note.textContent=""; }, 1800);
+  }catch(e){
+    console.error(e);
+    note.textContent = "erreur d'enregistrement du tableau : " + (e.code || e.message || e);
+  }
+}
+
+function openSaved(id){
+  const entry = savedTables.find(t => t.id === id);
+  if(!entry) return;
+  state = JSON.parse(JSON.stringify(entry.data));
+  if(!state.frameColor) state.frameColor = "#000000";
+  document.getElementById('frameColor').value = state.frameColor;
+  document.documentElement.style.setProperty('--frame-color', state.frameColor);
+  applyFontSettings();
+  save();
+  render();
+  refitAllMatiere();
+  document.getElementById('tableExport').scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+async function deleteSaved(id){
+  try{
+    await deleteDoc(doc(savedTablesCol(), id));
+    savedTables = savedTables.filter(t => t.id !== id);
+    renderSavedList();
+  }catch(e){
+    console.error(e);
+    document.getElementById('saveNote').textContent = "erreur de suppression : " + (e.code || e.message || e);
+  }
+}
+
+async function downloadSavedPDF(id){
+  const entry = savedTables.find(t => t.id === id);
+  if(!entry) return;
+  const note = document.getElementById('saveNote');
+  const backupState = state;
+  const backupFrame = document.getElementById('frameColor').value;
+  const backupFontFamily = document.getElementById('fontSelect').value;
+  const backupFontWeight = document.getElementById('fontWeightSelect').value;
+  try{
+    note.textContent = "génération du PDF...";
+    state = JSON.parse(JSON.stringify(entry.data));
+    if(!state.frameColor) state.frameColor = "#000000";
+    document.documentElement.style.setProperty('--frame-color', state.frameColor);
+    applyFontSettings();
+    render();
+    refitAllMatiere();
+    await exportPDF(entry.name.replace(/[^a-z0-9-_ ]/gi,'').trim() || 'my-amelie');
+  }finally{
+    state = backupState;
+    document.documentElement.style.setProperty('--frame-color', backupFrame);
+    document.getElementById('fontSelect').value = backupFontFamily;
+    document.getElementById('fontWeightSelect').value = backupFontWeight;
+    document.documentElement.style.setProperty('--matiere-font', backupFontFamily);
+    document.documentElement.style.setProperty('--matiere-weight', backupFontWeight);
+    render();
+    refitAllMatiere();
+    if(note.textContent === "génération du PDF...") note.textContent = "";
+  }
+}
+
+function newTable(){
+  if(!confirm("Créer un nouveau tableau vide ? Pense à enregistrer le tableau actuel avant si besoin.")) return;
+  const keepFontFamily = document.getElementById('fontSelect').value;
+  const keepFontWeight = document.getElementById('fontWeightSelect').value;
+  state = { frameColor:"#000000", fontFamily:keepFontFamily, fontWeight:keepFontWeight, subjects:[
+    { id:newId('s'), name:"Matière", courses:[
+      { id:newId('c'), cours:"", dateCours:"", dateRevision:"", niveau:"" }
+    ]}
+  ]};
+  document.getElementById('frameColor').value = state.frameColor;
+  document.documentElement.style.setProperty('--frame-color', state.frameColor);
+  applyFontSettings();
+  save();
+  render();
+  refitAllMatiere();
+}
+
+document.getElementById('saveAsBtn').addEventListener('click', saveCurrentAs);
+document.getElementById('newTableBtn').addEventListener('click', newTable);
+
+function fitMatiereText(el){
+  const text = el.value || "";
+  const longestWord = text.split(/\s+/).reduce((a,b) => b.length > a.length ? b : a, "");
+  let size = 26;
+  if(longestWord.length > 7)  size = 21;
+  if(longestWord.length > 10) size = 17;
+  if(longestWord.length > 13) size = 14;
+  if(longestWord.length > 17) size = 12;
+  el.style.fontSize = size + "px";
+  el.style.height = "auto";
+  el.style.height = el.scrollHeight + "px";
+}
+
+function render(){
+  const body = document.getElementById('sheetBody');
+  body.innerHTML = "";
+
+  state.subjects.forEach((subj, sIdx) => {
+    const hue = subj.id.charCodeAt(subj.id.length-1) % 2 === 0 ? "var(--chimie)" : "var(--maths)";
+
+    subj.courses.forEach((course, cIdx) => {
+      const tr = document.createElement('tr');
+      tr.className = 'course-row';
+
+      if(cIdx === 0){
+        const tdMatiere = document.createElement('td');
+        tdMatiere.className = 'matiere-cell';
+        tdMatiere.rowSpan = subj.courses.length;
+        tdMatiere.style.setProperty('--subj-color', hue);
+        const nameInput = document.createElement('textarea');
+        nameInput.rows = 1;
+        nameInput.value = subj.name;
+        nameInput.placeholder = "Matière";
+        nameInput.addEventListener('input', e => {
+          subj.name = e.target.value;
+          fitMatiereText(e.target);
+          save();
+        });
+        tdMatiere.appendChild(nameInput);
+        requestAnimationFrame(() => fitMatiereText(nameInput));
+        const delSubj = document.createElement('button');
+        delSubj.className = 'del-subject';
+        delSubj.textContent = '✕ matière';
+        delSubj.title = 'Supprimer cette matière';
+        delSubj.addEventListener('click', () => { state.subjects.splice(sIdx,1); save(); render(); });
+        tdMatiere.appendChild(delSubj);
+        tr.appendChild(tdMatiere);
+      }
+
+      const tdCours = document.createElement('td');
+      tdCours.setAttribute('data-label','Cours');
+      const coursInput = document.createElement('input');
+      coursInput.className = 'cours-input';
+      coursInput.placeholder = "Nom du cours";
+      coursInput.value = course.cours;
+      coursInput.addEventListener('input', e => { course.cours = e.target.value; save(); });
+      tdCours.appendChild(coursInput);
+      tr.appendChild(tdCours);
+
+      const tdDC = document.createElement('td');
+      tdDC.setAttribute('data-label','Date du cours');
+      const dcInput = document.createElement('input');
+      dcInput.className = 'date-input';
+      dcInput.type = 'date';
+      dcInput.value = course.dateCours;
+      dcInput.addEventListener('input', e => { course.dateCours = e.target.value; save(); });
+      tdDC.appendChild(dcInput);
+      tr.appendChild(tdDC);
+
+      const tdDR = document.createElement('td');
+      tdDR.setAttribute('data-label','Date de révision');
+      const drInput = document.createElement('input');
+      drInput.className = 'date-input';
+      drInput.type = 'date';
+      drInput.value = course.dateRevision;
+      drInput.addEventListener('input', e => { course.dateRevision = e.target.value; save(); });
+      tdDR.appendChild(drInput);
+      tr.appendChild(tdDR);
+
+      const tdNiv = document.createElement('td');
+      tdNiv.className = 'niveau-cell';
+      tdNiv.setAttribute('data-label','Niveau');
+      const swatch = document.createElement('span');
+      swatch.className = 'swatch' + (course.niveau ? '' : ' empty');
+      if(course.niveau) swatch.style.background = course.niveau;
+      swatch.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const already = tdNiv.querySelector('.palette');
+        closeAllPalettes();
+        if(already) return;
+        const pal = document.createElement('div');
+        pal.className = 'palette';
+        PALETTE.forEach(color => {
+          const b = document.createElement('button');
+          b.style.background = color;
+          b.addEventListener('click', (ev) => { ev.stopPropagation(); course.niveau = color; save(); render(); });
+          pal.appendChild(b);
+        });
+        const noneBtn = document.createElement('button');
+        noneBtn.className = 'none';
+        noneBtn.title = 'Effacer';
+        noneBtn.addEventListener('click', (ev) => { ev.stopPropagation(); course.niveau = ""; save(); render(); });
+        pal.appendChild(noneBtn);
+        tdNiv.appendChild(pal);
+      });
+      tdNiv.appendChild(swatch);
+      tr.appendChild(tdNiv);
+
+      const tdActions = document.createElement('td');
+      tdActions.className = 'actions-cell';
+      const delBtn = document.createElement('button');
+      delBtn.className = 'del-row';
+      delBtn.textContent = '✕';
+      delBtn.title = 'Supprimer ce cours';
+      delBtn.addEventListener('click', () => { subj.courses.splice(cIdx,1); save(); render(); });
+      tdActions.appendChild(delBtn);
+      tr.appendChild(tdActions);
+
+      body.appendChild(tr);
+    });
+
+    const addCourseTr = document.createElement('tr');
+    addCourseTr.className = 'add-course-row';
+    const addCourseTd = document.createElement('td');
+    addCourseTd.colSpan = 6;
+    addCourseTd.textContent = '+ ajouter un cours';
+    addCourseTd.addEventListener('click', () => {
+      subj.courses.push({ id:newId('c'), cours:"", dateCours:"", dateRevision:"", niveau:"" });
+      save(); render();
+    });
+    addCourseTr.appendChild(addCourseTd);
+    body.appendChild(addCourseTr);
+  });
+
+  const addSubjectTr = document.createElement('tr');
+  addSubjectTr.className = 'add-subject-row';
+  const addSubjectTd = document.createElement('td');
+  addSubjectTd.colSpan = 6;
+  const addSubjectBtn = document.createElement('button');
+  addSubjectBtn.textContent = '+ nouvelle matière';
+  addSubjectBtn.addEventListener('click', () => {
+    state.subjects.push({ id:newId('s'), name:"Nouvelle matière", courses:[
+      { id:newId('c'), cours:"", dateCours:"", dateRevision:"", niveau:"" }
+    ]});
+    save(); render();
+  });
+  addSubjectTd.appendChild(addSubjectBtn);
+  addSubjectTr.appendChild(addSubjectTd);
+  body.appendChild(addSubjectTr);
+}
+
+document.addEventListener('click', closeAllPalettes);
+
+/* ---------- EXPORT ---------- */
+
+function niveauLabel(hex){
+  const map = {"#e6564f":"à revoir","#f0b429":"moyen","#3fae5a":"maîtrisé","#3e8fd0":"bleu","#9b5de5":"violet","#c23e83":"rose"};
+  return hex ? (map[hex] || hex) : "-";
+}
+
+function buildTextExport(){
+  let lines = [];
+  lines.push("MY AMELIE - Tableau de révisions");
+  lines.push("=".repeat(40));
+  state.subjects.forEach(subj => {
+    lines.push("");
+    lines.push(subj.name.toUpperCase());
+    lines.push("-".repeat(subj.name.length));
+    subj.courses.forEach(c => {
+      lines.push(`- ${c.cours || "(sans nom)"}`);
+      lines.push(`    Date du cours     : ${c.dateCours || "-"}`);
+      lines.push(`    Date de révision  : ${c.dateRevision || "-"}`);
+      lines.push(`    Niveau            : ${niveauLabel(c.niveau)}`);
+    });
+  });
+  return lines.join("\n");
+}
+
+const NIVEAU_FILL_HEX = {"à revoir":"FFE6564F","moyen":"FFF0B429","maîtrisé":"FF3FAE5A","bleu":"FF3E8FD0","violet":"FF9B5DE5","rose":"FFC23E83"};
+
+async function exportExcel(){
+  const note = document.getElementById('saveNote');
+  try{
+    if(typeof ExcelJS === 'undefined'){
+      throw new Error("bibliothèque Excel indisponible (pas de connexion réseau ?)");
+    }
+    note.textContent = "génération du fichier Excel...";
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet("MY AMELIE");
+    ws.columns = [
+      { header:"Matière", key:"matiere", width:20 },
+      { header:"Cours", key:"cours", width:32 },
+      { header:"Date du cours", key:"dateCours", width:18 },
+      { header:"Date de révision", key:"dateRevision", width:18 },
+      { header:"Niveau", key:"niveau", width:16 }
+    ];
+    ws.getRow(1).font = { bold:true };
+    const BLACK_BORDER = { style:'medium', color:{ argb:'FF000000' } };
+    ws.getRow(1).eachCell(cell => {
+      cell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFF2EEE6' } };
+      cell.border = { top:BLACK_BORDER, left:BLACK_BORDER, bottom:BLACK_BORDER, right:BLACK_BORDER };
+    });
+
+    let rowIndex = 1;
+    state.subjects.forEach(subj => {
+      const startRow = rowIndex + 1;
+      subj.courses.forEach(c => {
+        rowIndex++;
+        const label = niveauLabel(c.niveau);
+        const row = ws.addRow({
+          matiere: subj.name,
+          cours: c.cours || "",
+          dateCours: c.dateCours || "",
+          dateRevision: c.dateRevision || "",
+          niveau: label !== "-" ? label : ""
+        });
+        const niveauCell = row.getCell('niveau');
+        const fill = NIVEAU_FILL_HEX[label];
+        if(fill){
+          niveauCell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb: fill } };
+          niveauCell.font = { color:{ argb:'FFFFFFFF' }, bold:true };
+          niveauCell.alignment = { horizontal:'center' };
+        }
+        row.eachCell(cell => { cell.border = { top:BLACK_BORDER, left:BLACK_BORDER, bottom:BLACK_BORDER, right:BLACK_BORDER }; });
+      });
+      const endRow = rowIndex;
+      if(endRow > startRow){
+        ws.mergeCells(startRow, 1, endRow, 1);
+        ws.getCell(startRow, 1).alignment = { vertical:'middle', horizontal:'center' };
+      }
+    });
+    // Reapply borders on the matière column after merging (merging can reset them)
+    for(let r = 2; r <= rowIndex; r++){
+      ws.getCell(r, 1).border = { top:BLACK_BORDER, left:BLACK_BORDER, bottom:BLACK_BORDER, right:BLACK_BORDER };
+    }
+    ws.views = [{ showGridLines:true }];
+
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(blob, "my-amelie.xlsx");
+    note.textContent = "Excel exporté ✓";
+    setTimeout(()=>{ if(note.textContent==="Excel exporté ✓") note.textContent=""; }, 1800);
+  }catch(err){
+    console.error(err);
+    note.textContent = "export impossible : " + (err && err.message ? err.message : err);
+  }
+}
+
+function exportWord(){
+  const note = document.getElementById('saveNote');
+  try{
+    note.textContent = "génération du document Word...";
+    const niveauColorMap = {"à revoir":"#e6564f","moyen":"#f0b429","maîtrisé":"#3fae5a","bleu":"#3e8fd0","violet":"#9b5de5","rose":"#c23e83"};
+    let bodyHtml = `<h1 style="font-family:Georgia,serif;color:#c23e83;">MY AMELIE</h1>
+      <p style="font-style:italic;color:#7a6d63;">mon tableau de révisions</p>
+      <table border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse;width:100%;font-family:Calibri,Arial,sans-serif;">
+      <tr style="background:#f2eee6;font-weight:bold;">
+        <td>Matière</td><td>Cours</td><td>Date du cours</td><td>Date de révision</td><td>Niveau</td>
+      </tr>`;
+    state.subjects.forEach(subj => {
+      subj.courses.forEach((c, idx) => {
+        const label = niveauLabel(c.niveau);
+        const color = niveauColorMap[label];
+        bodyHtml += `<tr>
+          ${idx === 0 ? `<td rowspan="${subj.courses.length}" style="font-weight:bold;vertical-align:middle;">${escapeHtml(subj.name)}</td>` : ""}
+          <td>${escapeHtml(c.cours || "")}</td>
+          <td>${escapeHtml(c.dateCours || "")}</td>
+          <td>${escapeHtml(c.dateRevision || "")}</td>
+          <td style="${color ? `background:${color};color:#ffffff;` : ""}text-align:center;">${label !== "-" ? label : ""}</td>
+        </tr>`;
+      });
+    });
+    bodyHtml += "</table>";
+
+    const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+      <head><meta charset="utf-8"><title>MY AMELIE</title></head>
+      <body>${bodyHtml}</body></html>`;
+
+    downloadBlob(html, "my-amelie.doc", "application/msword;charset=utf-8");
+    note.textContent = "Word exporté ✓";
+    setTimeout(()=>{ if(note.textContent==="Word exporté ✓") note.textContent=""; }, 1800);
+  }catch(err){
+    console.error(err);
+    note.textContent = "export impossible : " + (err && err.message ? err.message : err);
+  }
+}
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function downloadBlob(content, filename, type){
+  const blob = new Blob([content], {type});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+async function captureBoard(){
+  if(typeof html2canvas === 'undefined'){
+    throw new Error("html2canvas indisponible (pas de connexion réseau ?)");
+  }
+  closeAllPalettes();
+  refitAllMatiere();
+  // Attend que les polices soient bien chargées et que la mise en page soit stabilisée,
+  // sinon html2canvas peut couper le texte (mauvaises métriques de police).
+  if(document.fonts && document.fonts.ready){
+    try{ await document.fonts.ready; }catch(e){}
+  }
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  const wrapper = document.getElementById('tableExport');
+  const table = document.getElementById('sheet');
+  table.classList.add('exporting');
+  const canvas = await html2canvas(wrapper, {
+    backgroundColor: "#ffffff",
+    scale: 2,
+    useCORS: true,
+    allowTaint: false,
+    letterRendering: true
+  });
+  table.classList.remove('exporting');
+  return canvas;
+}
+
+async function exportImage(format){
+  const note = document.getElementById('saveNote');
+  try{
+    note.textContent = "génération de l'image...";
+    const canvas = await captureBoard();
+    const mime = format === 'jpg' ? 'image/jpeg' : 'image/png';
+    const dataUrl = canvas.toDataURL(mime, 0.95);
+    const a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = `my-amelie.${format}`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    note.textContent = "image exportée ✓";
+    setTimeout(()=>{ if(note.textContent==="image exportée ✓") note.textContent=""; }, 1800);
+  }catch(err){
+    console.error(err);
+    note.textContent = "export impossible : " + (err && err.message ? err.message : err);
+  }
+}
+
+async function exportPDF(filename){
+  const note = document.getElementById('saveNote');
+  try{
+    note.textContent = "génération du PDF...";
+    if(typeof window.jspdf === 'undefined'){
+      throw new Error("jsPDF indisponible (pas de connexion réseau ?)");
+    }
+    const canvas = await captureBoard();
+    const { jsPDF } = window.jspdf;
+    const imgData = canvas.toDataURL('image/png');
+    const pxToMm = 25.4 / 96;
+    const wMm = canvas.width * pxToMm / 2;
+    const hMm = canvas.height * pxToMm / 2;
+    const orientation = wMm > hMm ? 'landscape' : 'portrait';
+    const pdf = new jsPDF({ orientation, unit: 'mm', format: [wMm, hMm] });
+    pdf.addImage(imgData, 'PNG', 0, 0, wMm, hMm);
+    pdf.save((filename || 'my-amelie') + '.pdf');
+    note.textContent = "PDF exporté ✓";
+    setTimeout(()=>{ if(note.textContent==="PDF exporté ✓") note.textContent=""; }, 1800);
+  }catch(err){
+    console.error(err);
+    note.textContent = "export impossible : " + (err && err.message ? err.message : err);
+  }
+}
+
+document.getElementById('exportBar').addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-export]');
+  if(!btn) return;
+  const type = btn.getAttribute('data-export');
+  const note = document.getElementById('saveNote');
+  if(type === 'txt'){
+    try{
+      downloadBlob(buildTextExport(), 'my-amelie.txt', 'text/plain;charset=utf-8');
+      note.textContent = "texte exporté ✓";
+      setTimeout(()=>{ if(note.textContent==="texte exporté ✓") note.textContent=""; }, 1800);
+    }catch(err){
+      console.error(err);
+      note.textContent = "export impossible : " + (err && err.message ? err.message : err);
+    }
+  } else if(type === 'xlsx'){
+    exportExcel();
+  } else if(type === 'docx'){
+    exportWord();
+  } else if(type === 'png' || type === 'jpg'){
+    exportImage(type);
+  } else if(type === 'pdf'){
+    exportPDF();
+  }
+});
+
+async function initApp(){
+  const note = document.getElementById('saveNote');
+  try{
+    note.textContent = "connexion...";
+    await waitForAuth();
+    note.textContent = "";
+  }catch(e){
+    note.textContent = "connexion impossible : " + (e.code || e.message || e);
+    return;
+  }
+  await load();
+  await loadSavedList();
+}
+
+initApp();
+</script>
+</body>
+</html>

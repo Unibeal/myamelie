@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MY AMELIE — Connexion</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root{
+  --paper:#FBF6EF;
+  --paper-line:#d4d4d4;
+  --ink:#3a2e2e;
+  --ink-soft:#7a6d63;
+  --marker:#c23e83;
+  --error:#b33;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--paper);
+  background-image:
+    linear-gradient(var(--paper-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--paper-line) 1px, transparent 1px);
+  background-size: 28px 28px;
+  font-family:'Inter', sans-serif;
+  color:var(--ink);
+  padding:20px;
+}
+
+.card{
+  width:100%;
+  max-width:360px;
+  background:#fff;
+  border:3px solid var(--ink);
+  border-radius:14px;
+  padding:28px 24px;
+  box-shadow:6px 6px 0 rgba(0,0,0,.08);
+}
+
+h1{
+  font-family:'Caveat', cursive;
+  font-size:44px;
+  font-weight:700;
+  color:var(--marker);
+  margin:0 0 2px;
+  line-height:1;
+  text-align:center;
+}
+.tagline{
+  font-size:12px;
+  color:var(--ink-soft);
+  font-style:italic;
+  text-align:center;
+  margin-bottom:22px;
+}
+
+.tabs{
+  display:flex;
+  border:2px solid var(--ink);
+  border-radius:20px;
+  overflow:hidden;
+  margin-bottom:20px;
+}
+.tabs button{
+  flex:1;
+  padding:8px 0;
+  font-family:'Inter',sans-serif;
+  font-size:13px;
+  font-weight:600;
+  border:none;
+  background:#fff;
+  color:var(--ink);
+  cursor:pointer;
+}
+.tabs button.active{background:var(--marker);color:#fff;}
+
+form{display:flex;flex-direction:column;gap:12px;}
+label{font-size:12px;font-weight:600;color:var(--ink-soft);}
+input[type="email"], input[type="password"]{
+  width:100%;
+  padding:10px 12px;
+  font-size:14px;
+  font-family:'Inter',sans-serif;
+  border:2px solid var(--ink);
+  border-radius:8px;
+  background:var(--paper);
+  color:var(--ink);
+}
+input:focus{outline:2px solid var(--marker);outline-offset:1px;}
+
+.submit-btn{
+  margin-top:6px;
+  padding:10px 0;
+  font-family:'Inter',sans-serif;
+  font-size:14px;
+  font-weight:700;
+  border:2px solid var(--ink);
+  border-radius:20px;
+  background:var(--marker);
+  border-color:var(--marker);
+  color:#fff;
+  cursor:pointer;
+}
+.submit-btn:hover{filter:brightness(1.05);}
+.submit-btn:disabled{opacity:.6;cursor:default;}
+.submit-btn:active{transform:translateY(1px);}
+
+.msg{
+  min-height:18px;
+  font-size:12.5px;
+  text-align:center;
+  margin-top:12px;
+}
+.msg.error{color:var(--error);}
+.msg.ok{color:#2f8f5a;}
+
+.forgot{
+  text-align:center;
+  margin-top:10px;
+}
+.forgot a{
+  font-size:12px;
+  color:var(--ink-soft);
+  text-decoration:underline;
+  cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>MY AMELIE</h1>
+  <div class="tagline">connecte-toi pour retrouver tes tableaux</div>
+
+  <div class="tabs">
+    <button type="button" id="tabLogin" class="active">Se connecter</button>
+    <button type="button" id="tabSignup">Créer un compte</button>
+  </div>
+
+  <form id="authForm">
+    <div>
+      <label for="email">E-mail</label>
+      <input type="email" id="email" required autocomplete="email">
+    </div>
+    <div>
+      <label for="password">Mot de passe</label>
+      <input type="password" id="password" required autocomplete="current-password" minlength="6">
+    </div>
+    <button type="submit" class="submit-btn" id="submitBtn">Se connecter</button>
+  </form>
+
+  <div class="forgot"><a id="forgotLink">Mot de passe oublié ?</a></div>
+  <div class="msg" id="msg"></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+import {
+  getAuth, onAuthStateChanged,
+  signInWithEmailAndPassword, createUserWithEmailAndPassword,
+  sendPasswordResetEmail
+} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyApUH7CPqZ3EAbbRS9bN2b0sdepuSZVLCM",
+  authDomain: "my-amelie-8172c.firebaseapp.com",
+  projectId: "my-amelie-8172c",
+  storageBucket: "my-amelie-8172c.firebasestorage.app",
+  messagingSenderId: "329204791393",
+  appId: "1:329204791393:web:b33d880d6a4890e2a95220"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const auth = getAuth(fbApp);
+
+// Si déjà connecté, direction l'app
+onAuthStateChanged(auth, (user) => {
+  if(user) window.location.href = "my-amelie.html";
+});
+
+let mode = "login"; // ou "signup"
+const tabLogin = document.getElementById('tabLogin');
+const tabSignup = document.getElementById('tabSignup');
+const submitBtn = document.getElementById('submitBtn');
+const msg = document.getElementById('msg');
+const form = document.getElementById('authForm');
+
+function setMode(m){
+  mode = m;
+  tabLogin.classList.toggle('active', m === 'login');
+  tabSignup.classList.toggle('active', m === 'signup');
+  submitBtn.textContent = m === 'login' ? 'Se connecter' : 'Créer mon compte';
+  msg.textContent = "";
+  msg.className = "msg";
+}
+tabLogin.addEventListener('click', () => setMode('login'));
+tabSignup.addEventListener('click', () => setMode('signup'));
+
+function friendlyError(code){
+  const map = {
+    "auth/invalid-email": "Adresse e-mail invalide.",
+    "auth/user-not-found": "Aucun compte avec cet e-mail.",
+    "auth/wrong-password": "Mot de passe incorrect.",
+    "auth/invalid-credential": "E-mail ou mot de passe incorrect.",
+    "auth/email-already-in-use": "Un compte existe déjà avec cet e-mail.",
+    "auth/weak-password": "Mot de passe trop court (6 caractères minimum).",
+    "auth/too-many-requests": "Trop de tentatives, réessaie plus tard.",
+    "auth/operation-not-allowed": "Connexion par e-mail/mot de passe désactivée dans Firebase (Authentication → Sign-in method)."
+  };
+  return map[code] || code;
+}
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  submitBtn.disabled = true;
+  msg.className = "msg";
+  msg.textContent = mode === 'login' ? "connexion..." : "création du compte...";
+  try{
+    if(mode === 'login'){
+      await signInWithEmailAndPassword(auth, email, password);
+    }else{
+      await createUserWithEmailAndPassword(auth, email, password);
+    }
+    msg.className = "msg ok";
+    msg.textContent = "connecté(e) ✓";
+    // onAuthStateChanged gère la redirection
+  }catch(err){
+    console.error(err);
+    msg.className = "msg error";
+    msg.textContent = friendlyError(err.code);
+    submitBtn.disabled = false;
+  }
+});
+
+document.getElementById('forgotLink').addEventListener('click', async () => {
+  const email = document.getElementById('email').value.trim();
+  if(!email){
+    msg.className = "msg error";
+    msg.textContent = "Entre ton e-mail ci-dessus puis clique sur ce lien.";
+    return;
+  }
+  try{
+    await sendPasswordResetEmail(auth, email);
+    msg.className = "msg ok";
+    msg.textContent = "E-mail de réinitialisation envoyé ✓";
+  }catch(err){
+    console.error(err);
+    msg.className = "msg error";
+    msg.textContent = friendlyError(err.code);
+  }
+});
+</script>
+</body>
+</html>
