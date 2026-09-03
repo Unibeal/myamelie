@@ -1,56 +1,56 @@
 {
-  "nom": "my-amelie",
+  "name": "my-amelie",
   "version": "1.0.0",
   "description": "MY AMELIE — mon tableau de révisions, en plus simple qu'Excel",
   "main": "main.js",
-  "auteur" : "MY AMELIE",
-  "licence" : "SANS LICENCE",
-  "privé" : vrai,
+  "author": "MY AMELIE",
+  "license": "UNLICENSED",
+  "private": true,
   "scripts": {
-    "début": "électron .",
+    "start": "electron .",
     "dist": "electron-builder --win --mac --linux",
     "dist:win": "electron-builder --win",
     "dist:mac": "electron-builder --mac",
     "dist:linux": "electron-builder --linux"
   },
   "devDependencies": {
-    "électron": "^31.0.0",
+    "electron": "^31.0.0",
     "electron-builder": "^24.13.3"
   },
-  "construire": {
+  "build": {
     "appId": "com.myamelie.app",
-    "nom_du_produit": "MY AMELIE",
-    "publier" : null,
-    "fichiers" : [
+    "productName": "MY AMELIE",
+    "publish": null,
+    "files": [
       "main.js",
       "app/**/*",
       "build/icon.png"
     ],
-    "répertoires" : {
-      "sortie": "libération"
+    "directories": {
+      "output": "release"
     },
-    "gagner": {
-      "icône": "build/icon.ico",
-      "cible": [
-        { "cible": "nsis", "arch": ["x64"] },
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        { "target": "nsis", "arch": ["x64"] },
         { "target": "portable", "arch": ["x64"] }
       ]
     },
     "nsis": {
-      "oneClick" : faux,
-      "autoriserLaModificationDuRépertoireD'Installation": vrai,
-      "createDesktopShortcut": vrai,
-      "createStartMenuShortcut": vrai
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
     },
     "mac": {
-      "icône": "build/icon.icns",
-      "cible" : "dmg" ,
-      "catégorie": "public.app-category.education"
+      "icon": "build/icon.icns",
+      "target": ["dmg"],
+      "category": "public.app-category.education"
     },
     "linux": {
-      "icône": "build/icon.png",
-      "cible" : ["AppImage"],
-      "catégorie" : "Éducation"
+      "icon": "build/icon.png",
+      "target": ["AppImage"],
+      "category": "Education"
     }
   }
 }
